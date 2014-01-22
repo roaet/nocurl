@@ -1,3 +1,5 @@
+tokens.conf
+
 *.py[cod]
 
 # C extensions
