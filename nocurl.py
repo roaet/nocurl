@@ -65,8 +65,12 @@ def exec_payload(payload):
     url = 'http://{}:{}/{}'.format(payload.url, payload.port, payload.route)
     headers = {'X-Auth-Token': payload.token}
     r = requests.get(url, headers=headers)
-    print json.dumps(r.json(), indent=4, separators=(',', ': '))
-    #print r.json()
+    if r.status_code == requests.codes.ok:
+        print(json.dumps(r.json(), indent=4, separators=(',', ': ')))
+    else:
+        print("Status code: {}".format(r.status_code))
+        print("Response: {}".format(r.text))
+    
 
 
 if __name__ == "__main__":
