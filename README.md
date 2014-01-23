@@ -1,6 +1,15 @@
-nocurl
-======
+Why nocurl?
+==========
+We have supernova. Why this?
 
+When you need to test out parts of an API that aren't available to
+supernova, you can use nocurl. Or you could just use curl. It's your life.
+
+Nocurl is 120 lines of code and only needs the requests library,
+so it's easier to modify than supernova, too.
+
+nocurl
+============
 Instead of using curl and copypasta, put your commonly-used API data into
 payloads.conf and run it with a CLI menu. The output json is pretty-printed.
 You can change payloads on-the-fly without restarting nocurl.
