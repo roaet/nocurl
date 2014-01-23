@@ -11,13 +11,14 @@ import os
 import requests
 
 class Payload(object):
-    def __init__(self, name, url, port, route, token, method):
+    def __init__(self, name, url, port, route, token, method, data):
         self.name = name
         self.url = url
         self.port = port
         self.route = route
         self.token = token
         self.method = method
+        self.data = data
     
     def __str__(self):
         return 'curl -s -i http://{}:{}/{} -X {} -H "X-Auth-Token: {}"'.format(
@@ -47,24 +48,43 @@ class Menu(object):
             route = config.get(section, 'route')
             token = config.get(section, 'token')
             method = config.get(section, 'method')
-            if len(token) < 8:
+            try:
+                data = json.loads(config.get(section, 'data'))  # needs to be in json format
+            except Exception:
+                data = None
+            if len(token) < 1:
                 token = default_token
-            p = Payload(section, url, port, route, token, method)
+            p = Payload(section, url, port, route, token, method, data)
             payloads.append(p)
         return payloads
     
     def prompt_payload(self):
         self.cls()
         print("Select payload:")
-        for i, payload in enumerate(self.payloads):
+        for i, payload in enumerate(self.payloads, start=1):
             print("{}. {}".format(i, payload.name)) 
         selection = input("?> ")
-        return self.payloads[selection]
+        return self.payloads[selection - 1]
 
 def exec_payload(payload):
     url = 'http://{}:{}/{}'.format(payload.url, payload.port, payload.route)
     headers = {'X-Auth-Token': payload.token}
-    r = requests.get(url, headers=headers)
+    if payload.method == "GET":
+        r = requests.get(url,  headers=headers)
+    elif payload.method == "POST":
+        r = requests.post(url, data=json.dumps(payload.data, ensure_ascii=True), headers=headers)
+    elif payload.method == "OPTIONS":
+        r = requests.options(url, data=payload.data, headers=headers)
+    elif payload.method == "PUT":
+        r = requests.put(url, data=payload.data, headers=headers)
+    elif payload.method == "PATCH":
+        r = requests.patch(url, data=payload.data, headers=headers)
+    elif payload.method == "DELETE":
+        r = requests.delete(url, data=payload.data, headers=headers)
+    elif payload.method == "HEAD":
+        r = requests.head(url, data=payload.data, headers=headers)
+    else:
+        print("Method {} unknown.".format(payload.method))
     if r.status_code == requests.codes.ok:
         print(json.dumps(r.json(), indent=4, separators=(',', ': ')))
     else:
@@ -75,9 +95,15 @@ def exec_payload(payload):
 
 if __name__ == "__main__":
     print "Hi"
-    menu = Menu()
-    payload = menu.prompt_payload()
-    print str(payload).replace(payload.token,
-            payload.token[:2] + '...' + payload.token[-2:])
-    print
-    exec_payload(payload)
+    while 1:
+        menu = Menu()
+        payload = menu.prompt_payload()
+        print str(payload).replace(payload.token,
+            payload.token[:3] + '...' + payload.token[-3:])
+        print("data: {}".format(json.dumps(payload.data, ensure_ascii=True)))
+        print("-="*40)
+        print
+        exec_payload(payload)
+        print
+        print("-="*40)
+        raw_input("Press ENTER to continue...")
