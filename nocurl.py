@@ -74,20 +74,17 @@ def exec_payload(payload):
     url = 'http://{}:{}/{}'.format(payload.url, payload.port, payload.route)
     headers = payload.headers
     method = payload.method.upper()
-    if method == "GET":
-        r = requests.get(url,  headers=headers)
-    elif method == "POST":
-        r = requests.post(url, data=json.dumps(payload.data, ensure_ascii=True), headers=headers)
-    elif method == "OPTIONS":
-        r = requests.options(url, data=payload.data, headers=headers)
-    elif method == "PUT":
-        r = requests.put(url, data=payload.data, headers=headers)
-    elif method == "PATCH":
-        r = requests.patch(url, data=payload.data, headers=headers)
-    elif method == "DELETE":
-        r = requests.delete(url, data=payload.data, headers=headers)
-    elif method == "HEAD":
-        r = requests.head(url, data=payload.data, headers=headers)
+    magic = {"GET": requests.get, "POST": requests.post, "OPTIONS": requests.options,
+            "PUT": requests.put, "PATCH": requests.patch, "DELETE": requests.delete,
+            "HEAD": requests.head}
+    if method in magic.keys():
+        try:
+            r = magic[method](url,
+                    data=json.dumps(payload.data, ensure_ascii=True),
+                    headers=headers)
+        except requests.exceptions.ConnectionError:
+            print("Connection to {}:{} refused.".format(payload.url, payload.port))
+            return
     else:
         print("Method {} unknown.".format(payload.method))
         return
