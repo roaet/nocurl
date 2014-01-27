@@ -103,10 +103,9 @@ def exec_payload(payload):
     
 
 if __name__ == "__main__":
-    print "Hi"
-    while 1:
+    if len(sys.argv) > 1:
         menu = Menu()
-        payload = menu.prompt_payload()
+        payload = menu.payloads[sys.argv[1]]
         print str(payload)
         print("data: {}".format(json.dumps(payload.data, ensure_ascii=True)))
         print(u"\u26A1 "*40)
@@ -114,4 +113,16 @@ if __name__ == "__main__":
         exec_payload(payload)
         print
         print(u"\u26A1 "*40)
-        raw_input("Press ENTER to continue...")
+    else:
+        print "Hi"
+        while 1:
+            menu = Menu()
+            payload = menu.prompt_payload()
+            print str(payload)
+            print("data: {}".format(json.dumps(payload.data, ensure_ascii=True)))
+            print(u"\u26A1 "*40)
+            print
+            exec_payload(payload)
+            print
+            print(u"\u26A1 "*40)
+            raw_input("Press ENTER to continue...")
