@@ -9,6 +9,7 @@ import ConfigParser as cfgp
 import json
 import os
 import requests
+import sys
 
 class Payload(object):
     def __init__(self, name, url, port, route, token, method, data,
